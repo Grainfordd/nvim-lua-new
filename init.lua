@@ -79,8 +79,6 @@ vim.keymap.set('n', '<leader>nt', '<cmd>lua MiniFiles.open()<cr>', {desc = 'File
 
 require('mini.pick').setup({})
 vim.keymap.set('n', '<leader><space>', '<cmd>Pick buffers<cr>', {desc = 'Search open files'})
--- vim.keymap.set('n', '<leader>ff', '<cmd>Pick files<cr>', {desc = 'Search all files'})
--- vim.keymap.set('n', '<leader>fh', '<cmd>Pick help<cr>', {desc = 'Search help tags'})
 
 -- List of compatible language servers is here:
 -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
@@ -107,7 +105,6 @@ vim.api.nvim_create_autocmd("CursorHold", {
 })
 
 
-
 -- for example `10<A-h>` will `resize_left` by `(10 * config.default_amount)`
 vim.keymap.set('n', '<A-h>', require('smart-splits').resize_left)
 vim.keymap.set('n', '<A-j>', require('smart-splits').resize_down)
@@ -119,7 +116,6 @@ vim.keymap.set('n', '<C-j>', require('smart-splits').move_cursor_down)
 vim.keymap.set('n', '<C-k>', require('smart-splits').move_cursor_up)
 vim.keymap.set('n', '<C-l>', require('smart-splits').move_cursor_right)
 vim.keymap.set('n', '<C-\\>', require('smart-splits').move_cursor_previous)
-
 
 
 
@@ -136,21 +132,21 @@ local function CompileCode()
 	vim.cmd("resize 10")
 
 	local commands = {
-		py = string.format('python3 %s', file),
+		py = string.format('python %s', file),
 		f90 = string.format(
-			'gfortran -Wall %s -o %s && ./%s',
+			"gfortran -Wall %s -o %s && ./%s",
 			file,
 			filename,
 			filename
 		),
 		c = string.format(
-			'gcc -Wall %s -lm -o %s && ./%s',
+			"gcc -W -Wall -pedantic %s -lm -o %s && ./%s",
 			file,
 			filename,
 			filename
 		),
 		cpp = string.format(
-			'g++ -Wall %s -o %s && ./%s',
+			'g++ -W -Wall -pedantic %s -o %s && ./%s',
 			file,
 			filename,
 			filename
@@ -167,12 +163,19 @@ local function CompileCode()
 			vim.log.levels.WARN
 		)
 	end
-
 end
 
 vim.api.nvim_create_user_command("CompileCode", CompileCode, {})
 
 vim.keymap.set('n', '<leader>f', CompileCode, {desc = "Compilar/Ejecutar código"})
+
 vim.cmd([[autocmd TermOpen * startinsert]])
--- vim.o.shell = 'powershell.exe'
+local os_name = vim.uv.os_uname().sysname
+
+if os_name == 'Windows_NT' then
+	vim.o.shell = 'pwsh'
+	vim.o.shellcmdflag = "-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command"
+	vim.o.shellxquote = ""
+end
+
 
